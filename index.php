@@ -1,55 +1,62 @@
 <?php
     $mostraRisultato = false;
     $errore = "";
+    $errore_a = "";
+    $errore_b = "";
     $risultato = 0;
 
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
-        $num1 = (float) $_POST["a"];
-        $num2 = (float) $_POST["b"];
-
-        if (isset($_POST["operazione"])) {
-            $operazione = $_POST["operazione"];
+        if (isset($_POST["a"]) && is_numeric($_POST["a"])) {
+            $num1 = (float) $_POST["a"];
         } else {
-            $operazione = "";
+            $errore_a = "Valore non valido!";
+            $num1 = 0;
+        }
+        
+        if (isset($_POST["b"]) && is_numeric($_POST["b"])) {
+            $num2 = (float) $_POST["b"];
+        } else {
+            $errore_b = "Valore non valido!";
+            $num2 = 0;
         }
 
-        if (isset($_POST["opzioni"])) {
-            $opzioni = $_POST["opzioni"];
-        } else {
-            $opzioni = array();
-        }
+        $operazione = isset($_POST["operazione"]) ? $_POST["operazione"] : "";
+        $opzioni = isset($_POST["opzioni"]) ? $_POST["opzioni"] : array();
 
-        if ($operazione == "") {
+        if ($errore_a == "" && $errore_b == "") {
+            if ($operazione == "") {
             $errore = "Devi scegliere un'operazione.";
-        } elseif ($operazione == "somma") {
-            $risultato = $num1 + $num2;
-        } elseif ($operazione == "differenza") {
-            $risultato = $num1 - $num2;
-        } elseif ($operazione == "prodotto") {
-            $risultato = $num1 * $num2;
-        } elseif ($operazione == "quoziente") {
-            if ($num2 == 0) {
-                $errore = "Non puoi dividere per zero.";
-            } else {
-                $risultato = $num1 / $num2;
+            } elseif ($operazione == "somma") {
+                $risultato = $num1 + $num2;
+            } elseif ($operazione == "differenza") {
+                $risultato = $num1 - $num2;
+            } elseif ($operazione == "prodotto") {
+                $risultato = $num1 * $num2;
+            } elseif ($operazione == "quoziente") {
+                if ($num2 == 0) {
+                    $errore = "Non puoi dividere per zero.";
+                } else {
+                    $risultato = $num1 / $num2;
+                }
             }
-        }
 
-        // Applico le opzioni solo se non ci sono errori
-        if ($errore == "") {
-            if (in_array("valAsso", $opzioni)) {
-                $risultato = abs($risultato);
+            if ($errore == "") {
+                if (in_array("valAsso", $opzioni)) {
+                    $risultato = abs($risultato);
+                }
+                if (in_array("quadr", $opzioni)) {
+                    $risultato = $risultato * $risultato;
+                }
+                if (in_array("arr", $opzioni)) {
+                    $risultato = round($risultato, 2);
+                }
             }
-            if (in_array("quadr", $opzioni)) {
-                $risultato = $risultato * $risultato;
-            }
-            if (in_array("arr", $opzioni)) {
-                $risultato = round($risultato, 2);
-            }
-        }
 
-        $mostraRisultato = true;
+            $mostraRisultato = true;
+        }
     }
+
+        
 ?>
 
 <!DOCTYPE html>
@@ -65,12 +72,17 @@
     <form action="index.php" method="POST">
         <label for="a">a: </label>
         <input type="number" id="a" name="a" step="any" required>
+
+        <?php if ($errore_a != ""): ?>
+            <p style="color: red"><?php echo "Valore non valido!" ?></p>
+        <?php endif ?>
+
         <br>
         <label for="b">b: </label>
         <input type="number" id="b" name="b" step="any" required>
 
         <br>
-        <fieldset>
+        <fieldset style="width: 250px;">
             <legend>Operazione</legend>
 
             <input type="radio" name="operazione" id="somma" value="somma">
@@ -88,7 +100,7 @@
 
         <br>
 
-        <fieldset>
+        <fieldset style="width: 250px;">
             <legend>Opzioni</legend>
 
             <input type="checkbox" name="opzioni[]" id="valAsso" value="valAsso">
@@ -120,4 +132,4 @@
         <?php endif; ?>
     </div>
 </body>
-</htm
+</html>
